@@ -1,0 +1,42 @@
+.form input {
+  outline: none;
+  margin: 0;
+  padding: 0 10px;
+  height: 40px;
+  min-width: 300px;
+  border-radius: 4px;
+  border: none;
+}
+
+.form button {
+  transition-property: background-color;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+
+  cursor: pointer;
+  margin-right: 10px;
+  height: 40px;
+  border-radius: 4px;
+  border: none;
+}
+
+.form button:hover {
+  background: rgb(156, 177, 247);
+  /* box-shadow: inset 0px 1px 6px rgba(26, 26, 37, 0.5); */
+  box-shadow: inset 0px 1px 6px rgba(26, 26, 37, 0.5);
+}
+
+.searchbar {
+  height: 60px;
+  background-image: linear-gradient(
+    to top,
+    rgba(46, 47, 66, 0.7),
+    rgba(82, 85, 141, 0.7)
+  );
+  background-color: rgb(51, 92, 226);
+  box-shadow: 0px 1px 6px rgba(26, 26, 37, 0.5);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
