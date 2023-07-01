@@ -64,6 +64,7 @@ export class App extends Component {
 
   onSubmit = dataSubmit => {
     this.setState({ dataSubmit });
+    this.setState({ perPage: quantityPage });
   };
 
   loadMor = () => {
