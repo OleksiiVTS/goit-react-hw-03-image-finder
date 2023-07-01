@@ -21,14 +21,16 @@ export class App extends Component {
   state = {
     dataSubmit: '',
     dataResult: [],
-    perPage: 12,
+    perPage: quantityPage,
     status: 'idle', // "idle"// "pending" // "resolved" // "rejected"
   };
 
   componentDidUpdate(prevProps, prevState) {
+    // Так чомусь не працює  --  prevState.perPage завжди === this.state.perPage
+    // і тому постійно показує false?!
     // console.log(prevState.perPage === this.state.perPage);
     if (prevState.perPage !== this.state.perPage) {
-      // Так чомусь не працює(( // завжи показує false?!
+      this.setState({ status: 'pending' });
       this.getRequest();
     }
 
