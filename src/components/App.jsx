@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import axios from 'axios';
+import { getApiImageGallery, quntityPage } from './Services/Api';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Searchbar from './Searchbar/Searchbar';
@@ -8,73 +8,58 @@ import LoadMorButton from './LoadMorButton/LoadMorButton';
 import { Circles } from 'react-loader-spinner';
 import css from './Loader/Loader.module.css';
 
-const API_KEY = '36502661-e8ee83efff2e99e0261d33261';
-const URL = 'https://pixabay.com/api/';
-const quantityPage = 12;
-const options = new URLSearchParams({
-  image_type: 'photo',
-  orientation: 'horizontal',
-  safesearch: 'true',
-}).toString();
-
 export class App extends Component {
   state = {
     dataSubmit: '',
     dataResult: [],
-    perPage: quantityPage,
+    page: 1,
+    totalImages: 0,
     status: 'idle', // "idle"// "pending" // "resolved" // "rejected"
   };
 
   componentDidUpdate(prevProps, prevState) {
-    // Так чомусь не працює  --  prevState.perPage завжди === this.state.perPage
-    // і тому постійно показує false?!
-    // console.log(prevState.perPage === this.state.perPage);
-    if (prevState.perPage !== this.state.perPage) {
-      this.setState({ status: 'pending' });
-      this.getRequest();
-    }
-
-    if (prevState.dataSubmit !== this.state.dataSubmit) {
-      this.setState({ status: 'pending' });
+    const { dataSubmit, page } = this.state;
+    if (prevState.dataSubmit !== dataSubmit || prevState.page !== page) {
       this.getRequest();
     }
   }
 
   getRequest = async () => {
-    const { dataSubmit, perPage } = this.state;
-    await axios
-      .get(
-        `${URL}?key=${API_KEY}&q=${dataSubmit}&per_page=${perPage}&${options}`
-      )
-      .then(({ data }) => {
-        if (data.hits.length > 0) {
-          this.setState({ dataResult: data.hits });
-          this.setState({ status: 'resolved' });
-        } else {
-          this.setState({ status: 'rejected' });
-          toast.error(
-            'Nothing was found according to your request! Please enter another request!'
-          );
-        }
-      })
-      .catch(error => {
+    const { dataSubmit, page } = this.state;
+    this.setState({ status: 'pending' });
+
+    try {
+      const { data } = await getApiImageGallery(dataSubmit, page);
+      if (!data.totalHits) {
         this.setState({ status: 'rejected' });
-        toast.error(error.message);
-      })
-      .finally();
+        toast.error(
+          'Nothing was found according to your request! Please enter another request!'
+        );
+        return;
+      }
+      this.setState(prevState => ({
+        dataResult: [...prevState.dataResult, ...data.hits],
+        status: 'resolved',
+        totalImages: data.totalHits,
+      }));
+    } catch (error) {
+      this.setState({ status: 'rejected' });
+      toast.error(error.message);
+    }
   };
 
   onSubmit = dataSubmit => {
-    this.setState({ dataSubmit });
-    this.setState({ perPage: quantityPage });
+    if (this.state.dataSubmit === dataSubmit) {
+      return;
+    }
+    this.setState({ dataSubmit, page: 1, dataResult: [] });
   };
 
   loadMor = () => {
     this.setState(prevState => {
-      prevState.perPage += quantityPage;
-
-      this.setState({ status: 'pending' });
-      this.getRequest();
+      return {
+        page: prevState.page + 1,
+      };
     });
   };
 
@@ -83,15 +68,14 @@ export class App extends Component {
     const { dataResult, status } = this.state;
 
     return (
-      <div>
+      <>
         <Searchbar onSubmit={this.onSubmit} />
-        {/* Якщо так то при Load More прокручує до верху сторінки */}
-        {/* {status === 'resolved' && <ImageGallery images={dataResult} />} */}
+
         {length !== 0 && <ImageGallery images={dataResult} />}
 
-        {length !== 0 && length % 12 === 0 && status === 'resolved' && (
-          <LoadMorButton loadMor={this.loadMor} />
-        )}
+        {length !== 0 &&
+          length % quntityPage === 0 &&
+          status === 'resolved' && <LoadMorButton loadMor={this.loadMor} />}
 
         {status === 'pending' && (
           <Circles
@@ -114,7 +98,7 @@ export class App extends Component {
           pauseOnHover
           theme="colored"
         />
-      </div>
+      </>
     );
   }
 }
