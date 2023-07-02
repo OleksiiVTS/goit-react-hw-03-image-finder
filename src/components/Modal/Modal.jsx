@@ -38,6 +38,10 @@ export default class Modal extends Component {
 }
 
 Modal.propTypes = {
-  dataImage: PropTypes.string.isRequired,
+  dataImage: PropTypes.shape({
+    tags: PropTypes.string.isRequired,
+    largeImageURL: PropTypes.string.isRequired,
+  }),
+
   closeModalWindow: PropTypes.func.isRequired,
 };
